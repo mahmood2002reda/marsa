@@ -91,10 +91,7 @@ public function setLocale1(Request $request)
     }
     public function index()
 {
-    // Retrieve all tours and return them (for example, in a paginated format or as a list)
-    $tours = Tour::all(); // يمكنك استخدام `paginate()` إذا كنت ترغب في التصفية على صفحات
-
-    // إذا كنت تستخدم واجهة API، يمكنك استخدام `TourResource` لتحويل النماذج إلى JSON:
+    $tours = Tour::all(); 
     return TourResource::collection($tours);
 }
 
@@ -306,19 +303,17 @@ public function setLocale1(Request $request)
        
     }
 
-        // جلب جميع الأنواع المميزة
     public function getTypes()
     {
-        $types = Tour::distinct()->pluck('type'); // جلب الأنواع المتاحة
+        $types = Tour::distinct()->pluck('type'); 
         return response()->json($types, 200);
     }
 
-    // جلب الرحلات حسب النوع المختار، وجلب المناطق المتاحة لهذا النوع
     public function getToursByType(Request $request)
     {
         $type=$request->$request->input('typy');
         $tours = Tour::where('type', $type)->get();
-        $governorates = Tour::where('type', $type)->distinct()->pluck('governorate'); // جلب المناطق المرتبطة بالنوع
+        $governorates = Tour::where('type', $type)->distinct()->pluck('governorate'); 
 
         if ($tours->isEmpty()) {
             return response()->json(['message' => 'No tours found for this type'], 404);
@@ -330,60 +325,49 @@ public function setLocale1(Request $request)
         ], 200);
     }
 
-    // جلب الرحلات حسب النوع والمنطقة المختارة
     public function getToursByTypeAndGovernorate($type,$governorate)
     {
-        $type = request()->route('type'); // استخراج النوع من المسار
-    
-        // فحص القيم التي يتم استقبالها من الطلب
+        $type = request()->route('type'); 
 
         $tours = Tour::where('type', $type)
                      ->where('governorate', $governorate)
                      ->get();
     
-        // إذا لم يتم العثور على جولات، إرجاع رسالة خطأ
         if ($tours->isEmpty()) {
             return response()->json(['message' => 'No tours found for this type and governorate'], 404);
         }
     
-        // إرجاع الجولات في استجابة JSON
         return response()->json($tours, 200);
     }
     
 
     public function create()
     {
-        return view('index'); // Display the form view
+        return view('index'); 
     }
 
     public function searchTours(Request $request)
     {
-        // الحصول على المدخلات من المستخدم
         $word = $request->input('searchName') ?? null;
         $governorate = $request->input('tourGavarnment') ?? null;
         $MinPrice = $request->input('MinPrice') ?? null;
         $MaxPrice = $request->input('MaxPrice') ?? null;
     
-        // تعيين اللغة الحالية
         $locale = app()->getLocale(); 
     
-        // بدء استعلام البحث من نموذج TourTranslation
         $query = TourTranslation::query()
-            ->with('images') // تحميل الصور باستخدام علاقة hasManyThrough
-            ->join('tours', 'tour_translations.tour_id', '=', 'tours.id') // التأكد من أن اسم الجدول هو "tours"
+            ->with('images') 
+            ->join('tours', 'tour_translations.tour_id', '=', 'tours.id') 
             ->where('tour_translations.locale', $locale);
     
-        // البحث بناءً على الاسم إذا كان متاحًا
         if (!empty($word)) {
             $query->where('tour_translations.name', 'like', '%' . $word . '%');
         }
     
-        // البحث بناءً على المحافظة (governorate) إذا كانت متاحة
         if (!empty($governorate)) {
             $query->where('tour_translations.governorate', 'like', '%' . $governorate . '%');
         }
     
-        // إضافة شرط السعر (إذا تم تحديد الحد الأدنى والأقصى)
         if (!empty($MinPrice) && !empty($MaxPrice)) {
             $query->whereBetween('tours.price', [$MinPrice, $MaxPrice]);
         } elseif (!empty($MinPrice)) {
@@ -392,13 +376,11 @@ public function setLocale1(Request $request)
             $query->where('tours.price', '<=', $MaxPrice);
         }
     
-        // الحصول على جميع النتائج
         $tours = $query->select('tour_translations.*', 'tours.price', 'tours.start_date', 'tours.latitude', 'tours.longitude', 'tours.has_offer')->get();
     
-        // التحقق من وجود نتائج
         if ($tours->count() > 0) {
             $data = [
-                'records' => SearchResource::collection($tours), // استخدام الـ Resource لتهيئة النتائج
+                'records' => SearchResource::collection($tours), 
             ];
             return ApiResponse::sendResponse(200, 'Tours retrieved successfully', $data);
         } else {
@@ -419,7 +401,6 @@ public function setLocale1(Request $request)
                 return response()->json(['error' => 'Unauthorized'], 401);
             }
 
-            // حفظ اللغة المفضلة في قاعدة البيانات
             $user->preferred_locale = $locale;
             
 /** @var \App\Models\User $user **/
@@ -454,7 +435,7 @@ public function setLocale1(Request $request)
         $currentLocale = app()->getLocale();
         return response()->json([
             'locale' => $currentLocale,
-            'message' => __('messages.welcome') // This will use a translated message
+            'message' => __('messages.welcome') 
         ]);
     }
 

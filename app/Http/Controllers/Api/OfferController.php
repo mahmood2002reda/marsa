@@ -21,7 +21,6 @@ return ApiResponse::sendResponse(201, 'get all offers  ',OfferResource::collecti
 
     public function OfferUpdate(Request $request, $id)
     {
-        // تحقق من صحة البيانات
         $validator = Validator::make($request->all(), [
             'new_price' => 'sometimes|required|numeric',
             'offer_end_date' => 'sometimes|required|date',
@@ -34,7 +33,6 @@ return ApiResponse::sendResponse(201, 'get all offers  ',OfferResource::collecti
             ], 422);
         }
 
-        // ابحث عن العرض المطلوب
         $offer = Offer::find($id);
 
         if (!$offer) {
@@ -43,10 +41,8 @@ return ApiResponse::sendResponse(201, 'get all offers  ',OfferResource::collecti
             ], 404);
         }
 
-        // تحديث العرض بناءً على البيانات الجديدة
         $offer->update($request->only(['new_price', 'offer_end_date']));
 
-        // إرجاع استجابة ناجحة
         return response()->json([
             'message' => 'Offer updated successfully',
             'data' => new OfferResource($offer)

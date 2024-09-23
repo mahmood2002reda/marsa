@@ -25,7 +25,7 @@ class FirebaseService
 
         $message = CloudMessage::withTarget('token', $token)
             ->withNotification($notification)
-            ->withData(['key' => 'value']); // Optional additional data
+            ->withData(['key' => 'value']); 
 
         $this->messaging->send($message);
     }

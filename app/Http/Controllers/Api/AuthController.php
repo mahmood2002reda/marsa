@@ -23,7 +23,6 @@ class AuthController extends Controller
     
      public function register(Request $request)
      {
-         // قواعد التحقق من صحة البيانات
          $validator = Validator::make($request->all(), [
              'name' => ['required', 'string', 'max:255'],
              'phone' => ['required', 'string', 'max:255', 'unique:users'],
@@ -43,7 +42,6 @@ class AuthController extends Controller
              return ApiResponse::sendResponse(422, 'Register validation errors', $validator->messages()->all());
          }
      
-         // إذا تم تقديم صورة، قم بمعالجتها
          $imageName = null;
          if ($request->hasFile('UserImage')) {
              $image = $request->file('UserImage');
@@ -51,7 +49,6 @@ class AuthController extends Controller
              $image->move(public_path('images/user'), $imageName);
          }
      
-         // إنشاء المستخدم
          $user = User::create([
              'name' => $request->name,
              'email' => $request->email,
@@ -61,7 +58,6 @@ class AuthController extends Controller
              'password' => Hash::make($request->password),
          ]);
      
-         // الحصول على التوكن للمستخدم الجديد
          $data = [
              'token' => $user->createToken('api')->plainTextToken,
              'name' => $user->name,
@@ -87,17 +83,14 @@ class AuthController extends Controller
              return ApiResponse::sendResponse(422, 'Login validation errors', $validator->messages()->all());
          }
      
-         // تحقق من صحة رقم الهاتف وكلمة المرور
          $user = User::where('phone', $request->phone)->first();
      
          if ($user && Hash::check($request->password, $user->password)) {
-             // توليد OTP وإرساله إلى الهاتف
              $otp = mt_rand(100000, 999999);
              $user->otp = $otp;
-             $user->otp_till = now()->addMinutes(10); // تحديد فترة انتهاء صلاحية OTP
+             $user->otp_till = now()->addMinutes(10); 
              $user->save();
      
-             // إرسال OTP عبر Twilio
              $twilioService = new Twilio();
              $twilioService->send($user);
      
@@ -124,12 +117,10 @@ class AuthController extends Controller
          $user = User::where('phone', $request->phone)->first();
      
          if ($user && $user->otp === $request->otp && $user->otp_till > now()) {
-             // حذف OTP بعد التحقق
              $user->otp = null;
              $user->otp_till = null;
              $user->save();
      
-             // إنشاء توكن للمستخدم
              $data['token'] = $user->createToken('api')->plainTextToken;
              $data['name'] = $user->name;
              $data['phone'] = $user->phone;
@@ -149,7 +140,6 @@ class AuthController extends Controller
 
     
     
-    // ...
     
     
     

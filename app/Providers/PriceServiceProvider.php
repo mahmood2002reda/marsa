@@ -12,7 +12,6 @@ class PriceServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        // تسجيل PriceService في الحاوية
         $this->app->singleton(PriceService::class, function ($app) {
             return new PriceService();
         });

@@ -14,7 +14,6 @@ class PaymentServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        // تسجيل PaymentService كـ singleton
         $this->app->singleton(PaymentService::class, function ($app) {
             return new PaymentService();
         });

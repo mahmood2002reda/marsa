@@ -16,10 +16,8 @@ trait TranslationTrait
      */
     public function translateContent($translationData, $fromLocale, $toLocale)
     {
-        // استخدم Google Translate لترجمة المحتوى
         $tr = new GoogleTranslate($toLocale); // Target language
     
-        // ترجم كل الحقول من اللغة الأصلية إلى اللغة الهدف
         $translatedContent = [
             'tour_duration' => $tr->translate($translationData['tour_duration']),
             'must_know' => $tr->translate($translationData['must_know']),

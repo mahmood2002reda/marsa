@@ -19,11 +19,10 @@ class ReservationController extends Controller
     protected $priceService;
     protected $paymentService;
 
-    // حقن خدمة PriceService في الكونترولر عبر الـ Dependency Injection
     public function __construct(PriceService $priceService , PaymentService $paymentService)
     {
         $this->priceService = $priceService;
-        $this->paymentService = $paymentService; // تأكد من إسناد $paymentService
+        $this->paymentService = $paymentService; 
 
     }
 
@@ -36,18 +35,14 @@ class ReservationController extends Controller
             'reservation_date' => 'required|date',
         ]);
 
-        // توليد رقم حجز عشوائي
         $reservationNumber = 'RES-' . strtoupper(Str::random(10));
-        $userId = Auth::id(); // الحصول على ID المستخدم الحالي
-
-        // استدعاء دالة totalPrice من الخدمة
+        $userId = Auth::id(); 
         $totalPrice = $this->priceService->totalPrice(
             $request->input('tour_id'),
             $request->input('number_of_people'),
             $request->input('number_of_children')
         );
 
-        // إنشاء الحجز
         $reservation = Reservation::create([
             'reservation_number' => $reservationNumber,
             'user_id' => $userId,
@@ -67,7 +62,6 @@ class ReservationController extends Controller
 
     public function processPayment(Request $request, $id)
     {
-        // استدعاء خدمة الدفع لمعالجة الدفع
         $response = $this->paymentService->processPayment($id, $request->input('stripeToken'));
 
         if ($response['success']) {
@@ -80,10 +74,8 @@ class ReservationController extends Controller
     
     public function showPaymentForm($id)
     {
-        // استرجاع الحجز باستخدام المعرف
         $reservation = Reservation::findOrFail($id);
     
-        // تمرير الحجز إلى العرض
         return view('tours.payment', compact('reservation'));
     }
     
